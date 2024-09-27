@@ -1,0 +1,33 @@
+# Ignore Visual Studio temporary files, build results, and
+# folders that caused your initial error
+.vs/
+*.user
+*.suo
+*.bak
+*.obj
+*.exe
+*.log
+*.pch
+*.vsidx
+
+# ASP.NET Core build directories
+bin/
+obj/
+
+# NPM and Node.js directories
+node_modules/
+npm-debug.log
+
+# Environment files
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# Exclude configuration files for security
+appsettings*.json
+
+# React build output directories
+build/
+dist/
