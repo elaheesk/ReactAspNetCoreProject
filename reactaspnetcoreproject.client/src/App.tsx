@@ -1,87 +1,134 @@
-//import { useEffect, useState } from 'react';
-//import './App.css';
-
-//interface Forecast {
-//    date: string;
-//    temperatureC: number;
-//    temperatureF: number;
-//    summary: string;
-//}
-
-//function App() {
-//    const [forecasts, setForecasts] = useState<Forecast[]>();
-
-//    useEffect(() => {
-//        populateWeatherData();
-//    }, []);
-
-//    const contents = forecasts === undefined
-//        ? <p><em>Loading... Please refresh once the ASP.NET backend has started. See <a href="https://aka.ms/jspsintegrationreact">https://aka.ms/jspsintegrationreact</a> for more details.</em></p>
-//        : <table className="table table-striped" aria-labelledby="tableLabel">
-//            <thead>
-//                <tr>
-//                    <th>Date</th>
-//                    <th>Temp. (C)</th>
-//                    <th>Temp. (F)</th>
-//                    <th>Summary</th>
-//                </tr>
-//            </thead>
-//            <tbody>
-//                {forecasts.map(forecast =>
-//                    <tr key={forecast.date}>
-//                        <td>{forecast.date}</td>
-//                        <td>{forecast.temperatureC}</td>
-//                        <td>{forecast.temperatureF}</td>
-//                        <td>{forecast.summary}</td>
-//                    </tr>
-//                )}
-//            </tbody>
-//        </table>;
-
-//    return (
-//        <div>
-//            <h1 id="tableLabel">Weather forecast</h1>
-//            <p>This component demonstrates fetching data from the server.</p>
-//            {contents}
-//        </div>
-//    );
-
-//    async function populateWeatherData() {
-//        const response = await fetch('weatherforecast');
-//        const data = await response.json();
-//        setForecasts(data);
-//    }
-//}
-
-//export default App;
-
-import { useEffect, useState } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './App.css';
+import Home from './pages/Home';
+import QuotesListPage from './pages/QuotesListPage';
+import { IFormData } from './types';
+import axios from 'axios';
+import { isFormDataComplete } from './utils/formUtils';
+import { useEffect, useState } from 'react';
+import Layout from './components/Layout';
 
 
-function App() {
-    useEffect(() => {
-        const fetchData = async () => {
-            const test = await fetch('https://localhost:7285/WeatherForecast');
 
-            console.log("hello", test.headers);
+
+const App: React.FC = () => {
+    const [quotesList, setQuotesList] = useState<IFormData[]>([]);
+    const [formData, setFormData] = useState<IFormData>({
+        name: '',
+        email: '',
+        content: '',
+        date: '',
+    });
+    const [isEditing, setIsEditing] = useState<boolean>(false);
+    const getPosts = async () => {
+        try {
+            const response = await axios.get('/api/form');
+            if (response.status === 200) {
+                setQuotesList(response.data);
+            }
+        } catch (error) {
+            console.error("Error fetching posts:", error);
         }
-        fetchData();
+    };
 
 
+    const handleAddData = async (newItem: IFormData) => {
+        const response = await axios.post('/api/form', newItem);
+
+        if (response.data.success) {
+            setQuotesList(response.data.data);
+            setFormData({
+                name: '',
+                email: '',
+                content: '',
+                date: '',
+            });
+            setIsEditing(false);
+        } else {
+            alert('Form submission failed!');
+        }
+    };
+
+
+    const handleRemove = async (id: string) => {
+        const response = await axios.delete(`/api/form/${id}`);
+        if (response.status === 200) {
+            setQuotesList(response.data.data);
+            setFormData({
+                name: '',
+                email: '',
+                content: '',
+                date: '',
+            });
+        }
+    }
+
+
+    const handleEdit = (quoteToEdit: IFormData) => {
+        const findQuote = quotesList.find((quote) => quote.userId === quoteToEdit.userId);
+        if (findQuote) {
+            setFormData(quoteToEdit)
+            setIsEditing(true);
+        } else {
+            return;
+        }
+    }
+
+
+    const postEditedQuote = async (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        const { value, name } = e.target;
+        if (isFormDataComplete(formData)) {
+            const updatedData = {
+                ...formData,
+                [name]: value
+            }
+
+            try {
+                const response = await axios.put(`/api/form/${updatedData.userId}`, updatedData);
+
+                if (response.data.success) {
+                    setQuotesList(response.data.data);
+                    setFormData({
+                        userId: '',
+                        name: '',
+                        email: '',
+                        content: '',
+                        date: '',
+                    });
+                    setIsEditing(false);
+                } else {
+                    alert('Form submission failed!');
+                }
+            }
+            catch (error) {
+                console.error("Error updating quote:", error);
+            }
+        }
+    }
+
+    useEffect(() => {
+        getPosts();
     }, []);
 
-
-
     return (
-        <div>
-            <h1 id="tableLabel">npm run dev to start the react project</h1>
-            <p>This component demonstrates fetching data from the server.</p>
-
-        </div>
+        <BrowserRouter>
+            <Routes>
+                <Route path="/" element={<Layout />}>
+                    <Route index element={<Home handleAddData={handleAddData}
+                        formData={formData}
+                        setFormData={setFormData}
+                        postEditedQuote={postEditedQuote}
+                        isEditing={isEditing}
+                        setIsEditing={setIsEditing}
+                        quotesList={quotesList}
+                        setQuotesList={setQuotesList }
+                        handleRemove={handleRemove}
+                        handleEdit={handleEdit} />} />
+                    <Route path="/quotes" element={<QuotesListPage quotesList={quotesList} handleRemove={handleRemove} handleEdit={handleEdit} />} />
+                </Route>
+            </Routes>
+        </BrowserRouter>
     );
-
-
 }
 
 export default App;

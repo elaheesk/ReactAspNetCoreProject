@@ -8,8 +8,9 @@
     <!-- Folder where production build objects will be placed -->
     <BuildOutputFolder>$(MSBuildProjectDirectory)\dist</BuildOutputFolder>
   </PropertyGroup>
-  <ItemGroup>
-    <Folder Include="src\components\" />
-    <Folder Include="src\pages\" />
-  </ItemGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties tsconfig_1app_1json__JsonSchema="" />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>
