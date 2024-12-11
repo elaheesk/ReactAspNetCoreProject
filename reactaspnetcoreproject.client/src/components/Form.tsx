@@ -30,7 +30,7 @@ const Form = ({ handleAddData, formData, setFormData, postEditedQuote, isEditing
     }
 
     return (
-        <div className="w-full max-w-xs mb-6">
+        <div className="w-full max-w-xs mb-6 mt-6">
             <form
                 className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
                 onSubmit={submitPostForm} >

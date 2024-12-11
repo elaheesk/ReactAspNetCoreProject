@@ -7,6 +7,7 @@ import axios from 'axios';
 import { isFormDataComplete } from './utils/formUtils';
 import { useEffect, useState } from 'react';
 import Layout from './components/Layout';
+import About from './pages/About';
 
 
 
@@ -24,6 +25,7 @@ const App: React.FC = () => {
         try {
             const response = await axios.get('/api/form');
             if (response.status === 200) {
+
                 setQuotesList(response.data);
             }
         } catch (error) {
@@ -36,7 +38,8 @@ const App: React.FC = () => {
         const response = await axios.post('/api/form', newItem);
 
         if (response.data.success) {
-            setQuotesList(response.data.data);
+
+            setQuotesList((prevQuotes) => [...prevQuotes, response.data.data]);
             setFormData({
                 name: '',
                 email: '',
@@ -53,6 +56,7 @@ const App: React.FC = () => {
     const handleRemove = async (id: string) => {
         const response = await axios.delete(`/api/form/${id}`);
         if (response.status === 200) {
+
             setQuotesList(response.data.data);
             setFormData({
                 name: '',
@@ -82,12 +86,17 @@ const App: React.FC = () => {
                 ...formData,
                 [name]: value
             }
-
             try {
                 const response = await axios.put(`/api/form/${updatedData.userId}`, updatedData);
-
                 if (response.data.success) {
-                    setQuotesList(response.data.data);
+                    const updatedList = quotesList.map((quote) => {
+                        if (quote.userId === response.data.data.userId) {
+                            return { ...response.data.data }
+                        } else {
+                            return { ...quote }
+                        }
+                    })
+                    setQuotesList(updatedList);
                     setFormData({
                         userId: '',
                         name: '',
@@ -121,10 +130,11 @@ const App: React.FC = () => {
                         isEditing={isEditing}
                         setIsEditing={setIsEditing}
                         quotesList={quotesList}
-                        setQuotesList={setQuotesList }
+                        setQuotesList={setQuotesList}
                         handleRemove={handleRemove}
                         handleEdit={handleEdit} />} />
                     <Route path="/quotes" element={<QuotesListPage quotesList={quotesList} handleRemove={handleRemove} handleEdit={handleEdit} />} />
+                    <Route path="/about" element={<About  />} />
                 </Route>
             </Routes>
         </BrowserRouter>

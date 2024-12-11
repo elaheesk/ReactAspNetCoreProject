@@ -42,7 +42,7 @@ const Home = ({ handleAddData, formData, setFormData, postEditedQuote, isEditing
             <Form handleAddData={handleAddData} formData={formData} setFormData={setFormData} postEditedQuote={postEditedQuote} isEditing={isEditing} setIsEditing={setIsEditing} />
             {quotesList.length ?
                 <>
-                    <div className="inline-block text-left mb-6">
+                    <div className="text-left mb-6">
                         <button type="button" className="inline-flex w-[224px] justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" onClick={() => setOpenDropDown(!openDropDown)}>
                             Sort by
                             <svg className="-mr-1 size-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">

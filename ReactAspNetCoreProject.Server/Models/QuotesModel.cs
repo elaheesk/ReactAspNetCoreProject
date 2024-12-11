@@ -4,6 +4,7 @@ namespace ReactAspNetCoreProject.Server.Models
 {
     public class QuotesModel
     {
+        [Key]
         public Guid UserId { get; set; } = Guid.NewGuid();    
         [Required]
         public string? Content { get; set; }

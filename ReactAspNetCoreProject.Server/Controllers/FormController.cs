@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using ReactAspNetCoreProject.Server.Data;
 using ReactAspNetCoreProject.Server.Models;
 
 namespace ReactAspNetCoreProject.Server.Controllers
@@ -7,27 +8,38 @@ namespace ReactAspNetCoreProject.Server.Controllers
     [ApiController]
     public class FormController : ControllerBase
     {
-        private static List<QuotesModel> _quotesList = new List<QuotesModel>();
+        private readonly AppDbContext _context;
+
+        public FormController(AppDbContext context)
+        {
+            _context = context; // Inject AppDbContext
+        }
+
+
         [HttpPost]
         public IActionResult PostFormData([FromBody] QuotesModel model)
         {
             if (ModelState.IsValid)
             {
-                _quotesList.Add(model);
-                return Ok(new { success = true, message = "Quote added successfully", data = _quotesList });
+                _context.Quotes.Add(model);
+                _context.SaveChanges();
+                return Ok(new { success = true, message = "Quote added successfully", data = model });
             }
             else
             {
                 return BadRequest(ModelState);
             }
+
         }
 
         [HttpGet]
         public IActionResult GetFormData()
         {
-            if (_quotesList.Any())
+            var quotes = _context.Quotes.ToList();
+
+            if (quotes.Any())
             {
-                return Ok(_quotesList);
+                return Ok(quotes); // Return the list of quotes
             }
             else
             {
@@ -38,21 +50,36 @@ namespace ReactAspNetCoreProject.Server.Controllers
         [HttpDelete("{id}")]
         public IActionResult DeleteQuote(string id)
         {
-
-            var findQuote = _quotesList.Where(quote => quote.UserId.ToString() == id).FirstOrDefault();
-            if (findQuote != null)
+            if (!Guid.TryParse(id, out var parsedId))
             {
-                _quotesList.Remove(findQuote);
+                return BadRequest(new { success = false, message = "Invalid ID format" });
             }
 
-            return Ok(new { success = true, message = "Quote removed successfully successfully", data = _quotesList });
+            var findQuote = _context.Quotes.FirstOrDefault(quote => quote.UserId == parsedId);
+            if (findQuote == null)
+            {
+                // Return 404 if the quote does not exist
+                return NotFound(new { success = false, message = "Quote not found" });
+            }
+            _context.Quotes.Remove(findQuote);
+            _context.SaveChanges();
+            var updatedQuotes = _context.Quotes.ToList();
+            return Ok(new { success = true, message = "Quote removed successfully successfully", data = updatedQuotes });
         }
 
 
         [HttpPut("{id}")]
         public IActionResult UpdateQuote(string id, [FromBody] QuotesModel updatedQuote)
         {
-            var existingQuote = _quotesList.FirstOrDefault(quote => quote.UserId.ToString() == id);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            if (!Guid.TryParse(id, out var parsedId))
+            {
+                return BadRequest(new { success = false, message = "Invalid ID format" });
+            }
+            var existingQuote = _context.Quotes.FirstOrDefault(quote => quote.UserId == parsedId);
             if (existingQuote == null)
             {
                 return NotFound(new { success = false, message = "Quote not found" });
@@ -64,7 +91,8 @@ namespace ReactAspNetCoreProject.Server.Controllers
             existingQuote.Name = updatedQuote.Name;
             existingQuote.Email = updatedQuote.Email;
 
-            return Ok(new { success = true, message = "Quote updated successfully", data = _quotesList });
+            _context.SaveChanges();
+            return Ok(new { success = true, message = "Quote updated successfully", data = existingQuote });
         }
     }
 }
