@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { navigationPages } from '../data';
 const NavBar = () => {
     return (
         <nav className="bg-gray-800 w-full">
@@ -11,8 +12,9 @@ const NavBar = () => {
                         </div>
                         <div className="hidden sm:ml-6 sm:block">
                             <div className="flex space-x-4">
-                                <Link className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white" to="/">Home</Link>
-                                <Link className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white" to="/quotes">Quotes</Link>
+                                {navigationPages.map((page, idx) =>
+                                    (<Link key={idx} className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white" to={page.linkTo}>{page.title}</Link>)
+                                )}
                             </div>
                         </div>
                     </div>
