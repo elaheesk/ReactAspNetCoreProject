@@ -1,8 +1,9 @@
 import Form from "../components/Form";
 import ListedQuotes from "../components/ListedQuotes";
-import React, { useState } from "react";
+import { useState } from "react";
+import { IHomeProps } from "../types";
 
-const Home = ({ handleAddData, formData, setFormData, postEditedQuote, isEditing, setIsEditing, quotesList, setQuotesList, handleRemove, handleEdit }) => {
+const Home = ({ handleAddData, formData, setFormData, postEditedQuote, isEditing, setIsEditing, quotesList, setQuotesList, handleRemove, handleEdit }:IHomeProps) => {
     const [openDropDown, setOpenDropDown] = useState(false);
     const sortedByAuthorAsc = () => {
         const sortedDesc = [...quotesList].sort((a, b) => {

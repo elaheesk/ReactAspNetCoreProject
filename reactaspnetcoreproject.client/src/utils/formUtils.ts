@@ -1,4 +1,6 @@
-export const updateFormField = (formData, setFormData, e) => {
+import { IFormData } from "../types";
+
+export const updateFormField = (formData: IFormData, setFormData: React.Dispatch<React.SetStateAction<IFormData>>, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({
         ...formData,
         [e.target.name]: e.target.value,

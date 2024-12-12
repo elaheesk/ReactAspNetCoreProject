@@ -53,7 +53,7 @@ const App: React.FC = () => {
     };
 
 
-    const handleRemove = async (id: string) => {
+    const handleRemove = async (id?: string) => {
         const response = await axios.delete(`/api/form/${id}`);
         if (response.status === 200) {
 
@@ -79,13 +79,12 @@ const App: React.FC = () => {
     }
 
 
-    const postEditedQuote = async (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        const { value, name } = e.target;
+    const postEditedQuote = async (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
         if (isFormDataComplete(formData)) {
             const updatedData = {
                 ...formData,
-                [name]: value
-            }
+            };
             try {
                 const response = await axios.put(`/api/form/${updatedData.userId}`, updatedData);
                 if (response.data.success) {
