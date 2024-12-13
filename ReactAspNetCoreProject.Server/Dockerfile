@@ -1,23 +1,21 @@
-# Stage 1: Build the .NET Core application
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /src
-
-# Copy everything to the container and restore dependencies
-COPY . .
-RUN dotnet restore
-
-# Publish the application to the /app directory
-RUN dotnet publish -c Release -o /app
-
-# Stage 2: Create the runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+# Use .NET 8 runtime for running the app
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
-
-# Copy the published output from the build stage
-COPY --from=build /app .
-
-# Expose the default HTTP port
 EXPOSE 80
 
-# Start the application
+# Use .NET 8 SDK for building the app
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+COPY . .
+
+# Restore dependencies
+RUN dotnet restore "ReactAspNetCoreProject.Server.csproj"
+
+# Build the application
+RUN dotnet publish "ReactAspNetCoreProject.Server.csproj" -c Release -o /app/publish
+
+# Final stage for runtime
+FROM base AS final
+WORKDIR /app
+COPY --from=build /app/publish .
 ENTRYPOINT ["dotnet", "ReactAspNetCoreProject.Server.dll"]
